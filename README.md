@@ -10,14 +10,10 @@ Add Skyfire skills to your AI assistant:
 npx skills add skyfire-xyz/skills
 ```
 
-After you install the skill try asking it to use the
-Skyfire skill in your coding agent prompts when writing Skyfire integration code. 
+After you install the skill try asking your coding agent to use the
+Skyfire skill in your prompts when writing Skyfire integration code. 
 
-**Note**: In Cursor, we found that you have to tell it to check the .agents folder in order to find and start using the skill.  
-
-If you install globally, tell Cursor agent to look for ~/.agents/skills to find the skyfire skill. 
-
-If other coding agents have similar difficultied direct them to ~/.agents/skills. 
+**Note**: In Cursor, we found that you have to tell it to check the ~/.agents folder in order to find and start using the skill. If other coding agents have similar difficulties locating the skill direct them to ~/.agents/skills. 
 
 
 ## What This Repo Includes
