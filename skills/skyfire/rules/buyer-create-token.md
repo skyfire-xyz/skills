@@ -59,6 +59,7 @@ token = response.json()["token"]
 - For `pay` and `kya+pay`, include `tokenAmount`.
 - Provide one target selector: `sellerServiceId` or `sellerDomainOrUrl`.
 - `expiresAt` is Unix epoch seconds and must be between 10 seconds and 24 hours in the future.
+- `identityPermissions` can be provided for `kya` and `kya+pay` tokens (default is empty array).
 - Persist only what you need; treat token material as sensitive.
 
 ## Reference
@@ -66,3 +67,4 @@ token = response.json()["token"]
 - [Create Token API](https://docs.skyfire.xyz/reference/create-token)
 - [expiresAt](https://docs.skyfire.xyz/reference/expiresat)
 - [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount)
+- [identityPermissions](https://docs.skyfire.xyz/reference/identitypermissions)

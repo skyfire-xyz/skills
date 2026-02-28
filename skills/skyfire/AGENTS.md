@@ -28,12 +28,12 @@ Use this skill when:
    2.3. [Enforce Token Creation Constraints](#enforce-token-creation-constraints)
 
 3. [Seller Token Acceptance and Charging](#seller-token-acceptance-and-charging)
-   3.1. [Use Introspection and Charge Correctly](#use-introspection-and-charge-correctly)
+   3.1. [Validate, Introspect, Charge, and Reconcile Seller Payments](#validate-introspect-charge-and-reconcile-seller-payments)
    3.2. [Verify JWT Claims with JWKS](#verify-jwt-claims-with-jwks)
    3.3. [Handle Missing or Invalid Tokens Consistently](#handle-missing-or-invalid-tokens-consistently)
 
 4. [Seller Service Management](#seller-service-management)
-   4.1. [Manage Seller Service Lifecycle](#manage-seller-service-lifecycle)
+   4.1. [Manage Seller Service Lifecycle (CRUD)](#manage-seller-service-lifecycle-crud)
 
 5. [Discovery and Agent Operations](#discovery-and-agent-operations)
    5.1. [Discover Services and Tags](#discover-services-and-tags)
@@ -249,6 +249,7 @@ token = response.json()["token"]
 - For `pay` and `kya+pay`, include `tokenAmount`.
 - Provide one target selector: `sellerServiceId` or `sellerDomainOrUrl`.
 - `expiresAt` is Unix epoch seconds and must be between 10 seconds and 24 hours in the future.
+- `identityPermissions` can be provided for `kya` and `kya+pay` tokens (default is empty array).
 - Persist only what you need; treat token material as sensitive.
 
 ## Reference
@@ -256,6 +257,7 @@ token = response.json()["token"]
 - [Create Token API](https://docs.skyfire.xyz/reference/create-token)
 - [expiresAt](https://docs.skyfire.xyz/reference/expiresat)
 - [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount)
+- [identityPermissions](https://docs.skyfire.xyz/reference/identitypermissions)
 
 ---
 
@@ -312,17 +314,17 @@ Token creation must respect type-specific field requirements and strict TTL boun
 
 <a name="seller-token-acceptance-and-charging"></a>
 
-### 3.1. Use Introspection and Charge Correctly
+### 3.1. Validate, Introspect, Charge, and Reconcile Seller Payments
 
-<a name="use-introspection-and-charge-correctly"></a>
+<a name="validate-introspect-charge-and-reconcile-seller-payments"></a>
 
 **Impact:** CRITICAL
 
-> Prevents unsafe token acceptance by using introspection before charging and returning consistent status codes.
+> Prevents unsafe token acceptance and billing errors by combining introspection, charge rules, processing windows, and reconciliation.
 
-# Use Introspection and Charge Correctly
+# Validate, Introspect, Charge, and Reconcile Seller Payments
 
-Seller services should introspect incoming tokens, enforce token type requirements, then charge as needed.
+Seller services should introspect incoming tokens, enforce token type/amount constraints, then charge and reconcile as needed.
 
 ## ❌ Incorrect
 
@@ -330,6 +332,18 @@ Seller services should introspect incoming tokens, enforce token type requiremen
 // Accepts token blindly and returns paid response
 const token = req.headers["skyfire-pay-id"];
 return res.json({ data: "premium content", token });
+```
+
+```typescript
+// Charges an arbitrary amount with no validity/balance checks
+await fetch("https://api.skyfire.xyz/api/v1/tokens/charge", {
+  method: "POST",
+  headers: {
+    "content-type": "application/json",
+    "skyfire-api-key": process.env.SKYFIRE_SELLER_API_KEY!
+  },
+  body: JSON.stringify({ token, chargeAmount: "9999" })
+});
 ```
 
 ## ✅ Correct
@@ -356,30 +370,55 @@ if (!introspect.isValid) {
   return res.status(401).json({ error: introspect.validationError || "Invalid token" });
 }
 
+// Only charge payment-capable token types
+if (tokenType === "kya") {
+  return res.status(402).json({ error: "kya token cannot be charged" });
+}
+
+// If service priceModel is PAY_PER_USE, you may omit chargeAmount and Skyfire uses service price.
+const chargePayload =
+  process.env.PRICE_MODEL === "PAY_PER_USE"
+    ? { token }
+    : { token, chargeAmount: "0.01" };
+
 const chargeResp = await fetch("https://api.skyfire.xyz/api/v1/tokens/charge", {
   method: "POST",
   headers: {
     "content-type": "application/json",
     "skyfire-api-key": skyfireApiKey
   },
-  body: JSON.stringify({ token, chargeAmount: "0.01" })
+  body: JSON.stringify(chargePayload)
 });
 if (!chargeResp.ok) return res.status(402).json({ error: "Charge failed" });
 
-return res.json({ ok: true });
+const chargeResult = await chargeResp.json();
+return res.json({
+  ok: true,
+  amountCharged: chargeResult.amountCharged,
+  remainingBalance: chargeResult.remainingBalance
+});
 ```
 
 ## Key Points
 
 - Read token from `skyfire-pay-id`.
 - Introspect token before charging.
+- Only charge `pay` / `kya+pay`; reject identity-only `kya` for paid operations.
+- `chargeAmount` is a string and must be `> 0` and within token value/remaining balance.
+- For `PAY_PER_USE` seller services, `chargeAmount` can be omitted and Skyfire charges service `price`.
 - Return `403` missing, `401` invalid, `402` insufficient payment.
-- Charge only after validation.
+- Sellers should still enforce `exp` and reject expired tokens, even though charging can be allowed up to 24h post-expiry.
+- Settlement is asynchronous and can take up to 51 hours depending on token expiry/grace windows.
+- Buyers can reconcile via `GET /api/v1/tokens/{tokenId}/charges` where `tokenId` is token `jti`.
 
 ## Reference
 
 - [Introspect Token](https://docs.skyfire.xyz/reference/introspect-token)
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token)
+- [chargeAmount](https://docs.skyfire.xyz/reference/chargeamount)
+- [Charge Processing](https://docs.skyfire.xyz/reference/charge-processing)
+- [Settlement of Payments](https://docs.skyfire.xyz/reference/settlement-of-payments)
+- [Get Token Charges](https://docs.skyfire.xyz/reference/get-token-charges)
 - [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens)
 
 ---
@@ -408,6 +447,7 @@ if (payload.exp > Date.now() / 1000) allowRequest();
 
 ```typescript
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import validator from "validator";
 
 const JWKS = createRemoteJWKSet(new URL("https://app.skyfire.xyz/.well-known/jwks.json"));
 const { payload, protectedHeader } = await jwtVerify(token, JWKS, {
@@ -416,12 +456,43 @@ const { payload, protectedHeader } = await jwtVerify(token, JWKS, {
   algorithms: ["ES256"]
 });
 
-// Enforce additional Skyfire claim checks based on token type and service targeting.
-if (!payload.exp || !payload.iat || !payload.sub || !payload.jti) {
-  throw new Error("Missing required claims");
-}
+// Header/type checks
 if (!["kya+JWT", "pay+JWT", "kya+pay+JWT"].includes(String(protectedHeader.typ))) {
   throw new Error("Unsupported token type");
+}
+
+// Core claim checks
+const now = Math.floor(Date.now() / 1000);
+if (payload.env !== "production") {
+  throw new Error("Invalid env claim for production service");
+}
+if (typeof payload.iat !== "number" || payload.iat > now) {
+  throw new Error("Invalid iat");
+}
+if (typeof payload.exp !== "number" || payload.exp <= now) {
+  throw new Error("Token expired");
+}
+if (!payload.sub || !payload.jti) {
+  throw new Error("Missing required claims");
+}
+if (!validator.isUUID(String(payload.sub)) || !validator.isUUID(String(payload.jti))) {
+  throw new Error("sub/jti must be UUIDs");
+}
+
+// Example service-targeting checks (adapt to your service)
+if (payload.aud !== "<YOUR_SELLER_AGENT_ID>") {
+  throw new Error("Audience mismatch");
+}
+
+// Pay/KYAPay-specific validations
+if (protectedHeader.typ === "pay+JWT" || protectedHeader.typ === "kya+pay+JWT") {
+  const amount = Number(payload.amount);
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
+  if (payload.cur !== "USD") throw new Error("Unsupported currency");
+
+  // Optional: enforce price model / price for your seller service
+  if (payload.sps !== "<EXPECTED_PRICE_MODEL>") throw new Error("Invalid price model");
+  if (payload.spr !== "<EXPECTED_PRICE>") throw new Error("Invalid price");
 }
 ```
 
@@ -430,14 +501,19 @@ if (!["kya+JWT", "pay+JWT", "kya+pay+JWT"].includes(String(protectedHeader.typ))
 - Verify signature with Skyfire JWKS.
 - Enforce `iss`, `aud`, `alg`, `exp`, `iat`, `sub`, and `jti`.
 - Enforce expected token type (`kya+JWT`, `pay+JWT`, `kya+pay+JWT`).
+- Validate `env` (`production` vs `sandbox`) against your deployment environment.
+- For pay-capable tokens, validate `amount`, `cur`, and service pricing claims (`sps`, `spr`).
 - Validate service targeting claims before fulfilling requests.
 - Cache JWKS for up to 60 minutes.
+- As a seller you can also use the introspect API 
 
 ## Reference
 
 - [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens)
 - [JWKS Endpoint](https://app.skyfire.xyz/.well-known/jwks.json)
 - [Welcome / Environments](https://docs.skyfire.xyz/reference/welcome)
+- [Skyfire Kyapay TypeScript Example](https://github.com/skyfire-xyz/kyapay/blob/main/code-examples/verifyKyaPayToken/typescript/src/index.ts)
+- [Skyfire Token Introspection](https://docs.skyfire.xyz/reference/introspect-token)
 
 ---
 
@@ -495,17 +571,17 @@ if (!hasSufficientBalance) {
 
 <a name="seller-service-management"></a>
 
-### 4.1. Manage Seller Service Lifecycle
+### 4.1. Manage Seller Service Lifecycle (CRUD)
 
-<a name="manage-seller-service-lifecycle"></a>
+<a name="manage-seller-service-lifecycle-crud"></a>
 
 **Impact:** HIGH
 
-> Prevents misconfigured services by using the documented create, update, activate, and deactivate lifecycle APIs.
+> Prevents misconfigured services by covering list/get/create/update/activate/deactivate APIs and buyerIdentityRequirement fields.
 
 # Manage Seller Service Lifecycle
 
-Seller services should be created with complete metadata, then updated and activated explicitly.
+Seller services should be discoverable to the seller, correctly configured at creation time, and explicitly managed through activation states.
 
 ## ❌ Incorrect
 
@@ -525,6 +601,13 @@ const headers = {
   "skyfire-api-key": process.env.SKYFIRE_SELLER_API_KEY!
 };
 
+// 1) List seller services for the current seller agent
+const all = await fetch("https://api.skyfire.xyz/api/v1/agents/seller-services", {
+  method: "GET",
+  headers
+}).then((r) => r.json());
+
+// 2) Create service with required fields
 await fetch("https://api.skyfire.xyz/api/v1/agents/seller-services", {
   method: "POST",
   headers,
@@ -537,23 +620,57 @@ await fetch("https://api.skyfire.xyz/api/v1/agents/seller-services", {
     priceModel: "PAY_PER_USE",
     minimumTokenAmount: "0.02",
     openApiSpecUrl: "https://api.weatherservice.com/v1/openapi.json",
+    // Empty arrays are valid if no additional identity fields are required
     buyerIdentityRequirement: { individual: ["birthdate"], business: [] },
     acceptedTokens: ["pay", "kya+pay"]
   })
+});
+
+const sellerServiceId = all.data?.[0]?.id;
+if (!sellerServiceId) throw new Error("No seller service found");
+
+// 3) Get one service by ID
+const service = await fetch(
+  `https://api.skyfire.xyz/api/v1/agents/seller-services/${sellerServiceId}`,
+  { method: "GET", headers }
+).then((r) => r.json());
+
+// 4) Update selected fields
+await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}`, {
+  method: "PATCH",
+  headers,
+  body: JSON.stringify({
+    description: "Updated weather service with alerts",
+    acceptedTokens: ["kya", "pay", "kya+pay"]
+  })
+});
+
+// 5) Activate / deactivate as needed
+await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}/activate`, {
+  method: "POST",
+  headers
 });
 ```
 
 ## Key Points
 
+- Use `GET /api/v1/agents/seller-services` to list all seller services owned by the current seller agent.
+- Use `GET /api/v1/agents/seller-services/{sellerServiceId}` for detail checks before updates or activation.
 - Use `POST /api/v1/agents/seller-services` to create.
 - Use `PATCH /api/v1/agents/seller-services/{sellerServiceId}` to update.
-- Use activate/deactivate endpoints for lifecycle state.
-- Set `acceptedTokens`, `buyerIdentityRequirement`, and pricing fields deliberately.
-- For API services, include `openApiSpecUrl`.
+- Use `POST .../{sellerServiceId}/activate` and `POST .../{sellerServiceId}/deactivate` for lifecycle state.
+- Create requires `name`, `description`, `tags`, `type`, `price`, `priceModel`, `minimumTokenAmount`, and `buyerIdentityRequirement`.
+- `type` controls URL fields: `openApiSpecUrl` (`API`), `mcpServerUrl` (MCP types), `websiteUrl` (`WEB_PAGE`), `fetchAgentProfileUrl` (`FETCH_AGENT`).
+- Configure `acceptedTokens` and `maxTokenTTLSeconds` intentionally.
+- `buyerIdentityRequirement` supports `individual` and `business` field arrays; both can be empty arrays when only verified email/no extra identity fields are needed.
+- Activation can fail for unapproved services (`BAD_REQUEST`); plan around review/approval workflows.
 
 ## Reference
 
+- [Get Agent's Services - All](https://docs.skyfire.xyz/reference/get-agents-seller-services-all)
+- [Get Agent's Service](https://docs.skyfire.xyz/reference/get-agents-service)
 - [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service-2)
+- [buyerIdentityRequirement](https://docs.skyfire.xyz/reference/buyeridentityrequirement)
 - [Update Agent's Service](https://docs.skyfire.xyz/reference/update-agents-service)
 - [Activate Agent's Service](https://docs.skyfire.xyz/reference/activate-agents-service)
 - [Deactivate Agent's Service](https://docs.skyfire.xyz/reference/deactivate-agents-service)
@@ -570,11 +687,11 @@ await fetch("https://api.skyfire.xyz/api/v1/agents/seller-services", {
 
 **Impact:** MEDIUM
 
-> Helps buyers select valid services by using directory APIs before token creation.
+> Helps buyers select valid services by using the complete Skyfire directory API surface before token creation.
 
-# Discover Services and Tags
+# Discover Services with Full Directory APIs
 
-Use directory endpoints to discover valid seller services before generating tokens.
+Use directory endpoints to discover and validate seller services before generating tokens.
 
 ## ❌ Incorrect
 
@@ -586,21 +703,41 @@ const sellerServiceId = "service-for-ai-news";
 ## ✅ Correct
 
 ```typescript
+// 1) Get available tags
 const tags = await fetch("https://api.skyfire.xyz/api/v1/directory/tags").then((r) => r.json());
 
+// 2) Get all discoverable approved+active services
+const allServices = await fetch("https://api.skyfire.xyz/api/v1/directory/services").then((r) => r.json());
+
+// 3) Filter by tags when you know topical scope
 const matchingServices = await fetch(
   "https://api.skyfire.xyz/api/v1/directory/services/search?commaDelimitedTags=ai,news"
 ).then((r) => r.json());
 
-const sellerServiceId = matchingServices.data[0].id;
+// 4) Optional: list services for a known seller agent
+const sellerServices = await fetch(
+  "https://api.skyfire.xyz/api/v1/directory/agents/98755a15-bcbb-4e7c-a4ac-0ae21b9ce5c7/services"
+).then((r) => r.json());
+
+// 5) Resolve final service ID and hydrate full details
+const candidateId = matchingServices.data?.[0]?.id ?? allServices.data?.[0]?.id;
+if (!candidateId) throw new Error("No discoverable service found");
+
+const service = await fetch(
+  `https://api.skyfire.xyz/api/v1/directory/services/${candidateId}`
+).then((r) => r.json());
+
+const sellerServiceId = service.id;
 ```
 
 ## Key Points
 
-- Use tags and directory search to avoid invalid service IDs.
-- Prefer approved and active services from directory endpoints.
-- Persist service IDs from trusted discovery responses.
-- Use `get-service` for detail checks before token generation.
+- Use `get-all-service-tags` to build search/filter UX and avoid ad-hoc tags.
+- Use `get-all-services` as baseline discovery for approved and active services.
+- Use `get-services-by-tags` for topical selection.
+- Use `get-services-by-agent` when you already know seller agent ID.
+- Use `get-service` for final detail validation before token creation.
+- Persist only trusted service IDs from directory responses.
 
 ## Reference
 
@@ -608,6 +745,7 @@ const sellerServiceId = matchingServices.data[0].id;
 - [Get All Services](https://docs.skyfire.xyz/reference/get-all-services)
 - [Get Services by Tags](https://docs.skyfire.xyz/reference/get-services-by-tags)
 - [Get Service](https://docs.skyfire.xyz/reference/get-service)
+- [Get Services by Agent](https://docs.skyfire.xyz/reference/get-services-by-agent)
 
 ---
 
@@ -731,6 +869,7 @@ print(result.final_output)
 
 ## Reference
 
+
 - [Skyfire MCP](https://mcp.skyfire.xyz/mcp)
 - [Using the Skyfire MCP Server](https://docs.skyfire.xyz/reference/using-the-skyfire-mcp-server)
 - [MCP Servers Guidance](https://docs.skyfire.xyz/reference/mcp-servers)
@@ -747,19 +886,20 @@ print(result.final_output)
 
 **Impact:** MEDIUM
 
-> Covers enterprise admin endpoints for user lifecycle and personal data operations.
+> Covers enterprise admin APIs for creating users, listing users, personal data updates, and activation lifecycle.
 
 # Manage Enterprise Users and Personal Data
 
-Enterprise workflows use organization user endpoints with enterprise admin API keys.
+Enterprise workflows use `/api/v1/organizations/users*` endpoints with an Enterprise Admin User API key.
 
 ## ❌ Incorrect
 
 ```typescript
-// Uses buyer/seller key for enterprise user admin operations
+// Uses buyer key and omits required role/email payload fields
 await fetch("https://api.skyfire.xyz/api/v1/organizations/users", {
   method: "POST",
-  headers: { "skyfire-api-key": process.env.SKYFIRE_BUYER_API_KEY! }
+  headers: { "skyfire-api-key": process.env.SKYFIRE_BUYER_API_KEY! },
+  body: JSON.stringify({ email: "new-user@example.com" })
 });
 ```
 
@@ -768,6 +908,7 @@ await fetch("https://api.skyfire.xyz/api/v1/organizations/users", {
 ```typescript
 const enterpriseKey = process.env.SKYFIRE_ENTERPRISE_ADMIN_API_KEY!;
 
+// 1) Create enterprise member/admin user
 await fetch("https://api.skyfire.xyz/api/v1/organizations/users", {
   method: "POST",
   headers: {
@@ -779,22 +920,55 @@ await fetch("https://api.skyfire.xyz/api/v1/organizations/users", {
     role: "MEMBER"
   })
 });
+
+// 2) List users (supports pageSize, pageCursor, filter)
+await fetch(
+  "https://api.skyfire.xyz/api/v1/organizations/users?pageSize=20&filter=%7B%22orgMemberRole%22%3A%22MEMBER%22%7D",
+  {
+    method: "GET",
+    headers: { "skyfire-api-key": enterpriseKey }
+  }
+);
+
+// 3) Update personal data for a specific user
+await fetch("https://api.skyfire.xyz/api/v1/organizations/users/9414a52e-97ab-4d75-b139-39838e92e962/personal-data", {
+  method: "POST",
+  headers: {
+    "content-type": "application/json",
+    "skyfire-api-key": enterpriseKey
+  },
+  body: JSON.stringify({
+    data: {
+      person: { firstName: "John", lastName: "Doe", birthdate: "1990-01-01" },
+      emailAddresses: [{ type: "Work", address: "john.doe@example.com" }]
+    }
+  })
+});
+
+// 4) Activate/deactivate by userId
+await fetch("https://api.skyfire.xyz/api/v1/organizations/users/9414a52e-97ab-4d75-b139-39838e92e962/activate", {
+  method: "PATCH",
+  headers: { "skyfire-api-key": enterpriseKey }
+});
 ```
 
 ## Key Points
 
-- Use Enterprise Admin User API key for enterprise user lifecycle operations.
-- Use create/list endpoints for membership management.
-- Use activate/deactivate endpoints for user status transitions.
-- Use personal-data endpoint for regulated profile updates with explicit payload shapes.
+- Use Enterprise Admin User API keys only; buyer/seller agent keys are not valid here.
+- `POST /api/v1/organizations/users` requires `email` and `role` (`MEMBER` or `ADMIN`).
+- Create response may include `buyerAgent` details and may include `userApiKey` for admin users.
+- `GET /api/v1/organizations/users` supports `pageSize`, `pageCursor`, and structured `filter`.
+- Personal data updates require `POST /api/v1/organizations/users/{userId}/personal-data` with `data` object.
+- Activate/deactivate use `PATCH .../{userId}/activate` and `PATCH .../{userId}/deactivate`.
+- Expect `401` for invalid org API key, `404` for missing user, and `422` for invalid UUID/payload validation.
 
 ## Reference
 
-- [Create Enterprise User](https://docs.skyfire.xyz/reference/create-enterprise-user)
+- [Create Enterprise User or Enterprise Admin User](https://docs.skyfire.xyz/reference/create-enterprise-user)
 - [Get Enterprise Users](https://docs.skyfire.xyz/reference/get-enterprise-users)
 - [Set Enterprise User Personal Data](https://docs.skyfire.xyz/reference/set-enterprise-user-personal-data)
-- [Set Enterprise User Active](https://docs.skyfire.xyz/reference/set-enterprise-user-active)
-- [Set Enterprise User Inactive](https://docs.skyfire.xyz/reference/set-enterprise-user-inactive)
+- [Set Enterprise User Status as Active](https://docs.skyfire.xyz/reference/set-enterprise-user-active)
+- [Set Enterprise User Status as Inactive](https://docs.skyfire.xyz/reference/set-enterprise-user-inactive)
 
 ---
 

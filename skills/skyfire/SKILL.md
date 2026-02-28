@@ -36,12 +36,12 @@ Use this skill when:
 - [Enforce Token Creation Constraints](rules/token-creation-constraints.md)
 
 ### 3. Seller Token Acceptance and Charging
-- [Use Introspection and Charge Correctly](rules/seller-introspect-charge.md)
+- [Validate, Introspect, Charge, and Reconcile Seller Payments](rules/seller-introspect-charge.md)
 - [Verify JWT Claims with JWKS](rules/jwt-verification-claims.md)
 - [Handle Missing or Invalid Tokens Consistently](rules/token-error-handling.md)
 
 ### 4. Seller Service Management
-- [Manage Seller Service Lifecycle](rules/seller-service-lifecycle.md)
+- [Manage Seller Service Lifecycle (CRUD)](rules/seller-service-agent-apis.md)
 
 ### 5. Discovery and Agent Operations
 - [Discover Services and Tags](rules/service-directory-discovery.md)
