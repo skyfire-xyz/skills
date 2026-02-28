@@ -10,6 +10,7 @@ Add Skyfire skills to your AI assistant:
 npx skills add skyfire-xyz/skills
 ```
 
+
 ## What This Repo Includes
 
 - `skills/skyfire/SKILL.md`: Main Skyfire skill entrypoint with curated rule links
@@ -37,6 +38,28 @@ npm run build:agents
 
 ```bash
 npm run watch:agents
+```
+
+Remove installed skills:
+
+```bash
+# Remove a specific skill
+npx skills remove <skill-name>
+
+# Example
+npx skills remove skyfire-xyz
+
+# Remove multiple skills
+npx skills remove <skill-1> <skill-2>
+
+# Remove all installed skills
+npx skills remove --all
+
+# Remove a skill from the global scope
+npx skills remove --global <skill-name>
+
+# Remove a skill from a specific agent (e.g., Cursor)
+npx skills remove <skill-name> --agent cursor
 ```
 
 ## References
