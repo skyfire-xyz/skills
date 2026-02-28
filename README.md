@@ -7,7 +7,7 @@ Distributable agent skills for Skyfire developers building agent identity and pa
 Add Skyfire skills to your AI assistant:
 
 ```bash
-npx skills add skyfirexyz/skills
+npx skills add skyfire-xyz/skills
 ```
 
 ## What This Repo Includes
