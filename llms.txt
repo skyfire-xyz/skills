@@ -1,0 +1,92 @@
+# Skyfire KYAPay
+
+> Identity and Payments for AI with token-based APIs for buyers, sellers, and enterprise workflows.
+
+Skyfire enables programmatic interaction between buyers and sellers through a token-based payment and identity protocol. Each user manages agent accounts (buyer or seller) that can interact with MCP servers, APIs, and services using Skyfire's identity (kya) and payment (pay) tokens.
+
+## Basic Workflow
+
+1. **Buyer agent creates a token** - Generates kya, pay, or kya+pay tokens for specific seller services
+2. **Seller service charges tokens** - Optionally charges pay and kya+pay tokens to process payments
+3. **Seller service extracts identity data** - Optionally extracts buyer identity data from kya and kya+pay tokens to verify buyer identity, create accounts, facilitate guest checkout, etc.
+
+### Authentication
+
+- **Header of request**: `skyfire-api-key: <SKYFIRE_API_KEY>`
+- **API Keys**: Created at agent account level in Skyfire dashboard
+- **Scopes**: Each buyer/seller agent has separate API keys
+
+## Skyfire KYAPay
+
+- [Welcome](https://docs.skyfire.xyz/reference/welcome): Starting point for Skyfire KYAPay docs and concepts.
+- [API Authentication](https://docs.skyfire.xyz/reference/api-authentication): How to authenticate API requests.
+- [Buyers](https://docs.skyfire.xyz/reference/buyers): Buyer-oriented reference entry point.
+- [Using the Skyfire MCP Server](https://docs.skyfire.xyz/reference/using-the-skyfire-mcp-server): Buyer-side MCP usage and integration flow.
+- [Sellers](https://docs.skyfire.xyz/reference/sellers): Seller-oriented reference entry point.
+- [Integrating Tokens into your Seller Services](https://docs.skyfire.xyz/reference/integrating-tokens-into-your-seller-services): End-to-end token handling for seller APIs.
+- [MCP Servers](https://docs.skyfire.xyz/reference/mcp-servers): MCP server resources and references.
+- [OpenAPI Specs](https://docs.skyfire.xyz/reference/openapi-specs): Machine-readable API specification.
+- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens): Verify token integrity and extract identity/payment data.
+- [Handling Missing or Invalid tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens): Error handling guidance for missing/invalid token inputs.
+
+## Seller Agent APIs
+
+- [Get Agent's Services - All](https://docs.skyfire.xyz/reference/get-agents-seller-services-all): Get all services available to an agent.
+- [Get Agent's Service](https://docs.skyfire.xyz/reference/get-agents-service): Get one seller service for an agent.
+- [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service-2): Create a new seller service.
+- [buyerIdentityRequirement](https://docs.skyfire.xyz/reference/buyeridentityrequirement): Field-level configuration for required buyer identity claims.
+- [Update Agent's Service](https://docs.skyfire.xyz/reference/update-agents-service): Update an existing seller service.
+- [Activate Agent's Service](https://docs.skyfire.xyz/reference/activate-agents-service): Mark a seller service active.
+- [Deactivate Agent's Service](https://docs.skyfire.xyz/reference/deactivate-agents-service): Mark a seller service inactive.
+
+## Agent APIs
+
+- [Get Agent's Wallet Balance](https://docs.skyfire.xyz/reference/get-agents-wallet-balance): Retrieve wallet balance for an agent.
+- [Get Agent's Source IP Addresses](https://docs.skyfire.xyz/reference/get-agents-source-ip-addresses): List allowed source IP addresses.
+- [Set Agent's Source IP Addresses](https://docs.skyfire.xyz/reference/set-agents-source-ip-addresses): Set allowed source IP addresses.
+- [Get Agent's Token Version](https://docs.skyfire.xyz/reference/get-agents-token-version): Get currently configured token version.
+- [Set Agent's Token Version](https://docs.skyfire.xyz/reference/set-agents-token-version): Set token version for an agent.
+
+## Service Directory APIs
+
+- [Get All Service Tags](https://docs.skyfire.xyz/reference/get-all-service-tags): List available directory tags.
+- [Get All Services](https://docs.skyfire.xyz/reference/get-all-services): List all discoverable services.
+- [Get Service](https://docs.skyfire.xyz/reference/get-service): Retrieve details for one service.
+- [Get Services by Tags](https://docs.skyfire.xyz/reference/get-services-by-tags): Filter services by tags.
+- [Get Services by Agent](https://docs.skyfire.xyz/reference/get-services-by-agent): List services for a specific agent.
+
+## Token APIs
+
+- [Create Token](https://docs.skyfire.xyz/reference/create-token): Create a KYA, PAY, or KYA+PAY token.
+- [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount): Token amount input field details.
+- [expiresAt](https://docs.skyfire.xyz/reference/expiresat): Token expiration field details.
+- [identityPermissions](https://docs.skyfire.xyz/reference/identitypermissions): Identity permissions field details.
+- [Charge Token](https://docs.skyfire.xyz/reference/charge-token): Charge an existing payment-capable token.
+- [chargeAmount](https://docs.skyfire.xyz/reference/chargeamount): Charge amount input field details.
+- [Charge Processing](https://docs.skyfire.xyz/reference/charge-processing): Charge execution workflow details.
+- [Settlement of Payments](https://docs.skyfire.xyz/reference/settlement-of-payments): Settlement behavior and lifecycle.
+- [Get Token Charges](https://docs.skyfire.xyz/reference/get-token-charges): List charges performed against a token.
+- [Introspect Token](https://docs.skyfire.xyz/reference/introspect-token): Inspect token metadata and state.
+- [HTTP Error Status Codes](https://docs.skyfire.xyz/reference/http-error-status-codes): HTTP error reference for token/API flows.
+
+## Enterprise APIs
+
+- [Create Enterprise User or Enterprise Admin User](https://docs.skyfire.xyz/reference/create-enterprise-user): Create an enterprise user or admin user.
+- [Get Enterprise Users](https://docs.skyfire.xyz/reference/get-enterprise-users): List enterprise users.
+- [Set Enterprise User Personal Data](https://docs.skyfire.xyz/reference/set-enterprise-user-personal-data): Update enterprise user profile data.
+- [Set Enterprise User Status as Active](https://docs.skyfire.xyz/reference/set-enterprise-user-active): Mark enterprise user active.
+- [Set Enterprise User Status as Inactive](https://docs.skyfire.xyz/reference/set-enterprise-user-inactive): Mark enterprise user inactive.
+
+## Technical Resources
+
+- [JWKS Endpoint](https://app.skyfire.xyz/.well-known/jwks.json): JSON Web Key Set for token verification
+- [Token Issuer](https://app.skyfire.xyz): JWT issuer for token validation
+
+## SDKS
+
+- [Skyfire Credits Wallet Embed SDK](https://docs.skyfire.xyz/reference/skyfire-credits-wallet-embed-sdk): Embed SDK for Skyfire wallet/credits experiences.
+
+## Optional
+
+- [API Reference Root](https://docs.skyfire.xyz/reference): Full index for all reference pages.
+- [Guides Home](https://docs.skyfire.xyz/docs): Conceptual guides and product walkthroughs.

@@ -1,0 +1,13 @@
+{
+  "name": "@skyfirexyz/skills",
+  "version": "1.0.0",
+  "description": "Agent skills for Skyfire identity and payments",
+  "type": "commonjs",
+  "license": "MIT",
+  "author": "Skyfire",
+  "scripts": {
+    "build:agents": "node scripts/build-agents.cjs",
+    "watch:agents": "node scripts/watch-agents.cjs",
+    "build": "npm run build:agents"
+  }
+}

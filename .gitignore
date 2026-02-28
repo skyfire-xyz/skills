@@ -1,0 +1,11 @@
+.env
+skills-example
+
+node_modules/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+.env
+.env.local
