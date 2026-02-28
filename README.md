@@ -15,7 +15,7 @@ Skyfire skill in your prompts when writing Skyfire integration code.
 
 **Note**: In Cursor, we found that you have to tell it to check the ~/.agents folder in order to find and start using the skill. If other coding agents have similar difficulties locating the skill direct them to ~/.agents/skills. 
 
-[Video Demo](https://www.loom.com/share/032054526aa8438e83291782d3c9d334)
+[Video Demo](https://youtu.be/HTwipHY-SMc)
 
 
 ## What This Repo Includes
