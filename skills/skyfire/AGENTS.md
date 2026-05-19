@@ -29,7 +29,7 @@ Use this skill when:
 
 3. [Seller Token Acceptance and Charging](#seller-token-acceptance-and-charging)
    3.1. [Validate, Introspect, Charge, and Reconcile Seller Payments](#validate-introspect-charge-and-reconcile-seller-payments)
-   3.2. [Verify JWT Claims with JWKS](#verify+jwt-claims-with-jwks)
+   3.2. [Verify JWT Claims with JWKS](#verify-jwt-claims-with-jwks)
    3.3. [Handle Missing or Invalid Tokens Consistently](#handle-missing-or-invalid-tokens-consistently)
 
 4. [Seller Service Management](#seller-service-management)
