@@ -31,7 +31,7 @@ const { payload, protectedHeader } = await jwtVerify(token, JWKS, {
 });
 
 // Header/type checks
-if (!["kya+JWT", "pay+JWT", "kya+pay+JWT"].includes(String(protectedHeader.typ))) {
+if (!["kya+jwt", "pay+jwt", "kya-pay+jwt"].includes(String(protectedHeader.typ))) {
   throw new Error("Unsupported token type");
 }
 
@@ -59,7 +59,7 @@ if (payload.aud !== "<YOUR_SELLER_AGENT_ID>") {
 }
 
 // Pay/KYAPay-specific validations
-if (protectedHeader.typ === "pay+JWT" || protectedHeader.typ === "kya+pay+JWT") {
+if (protectedHeader.typ === "pay+jwt" || protectedHeader.typ === "kya-pay+jwt") {
   const amount = Number(payload.amount);
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
   if (payload.cur !== "USD") throw new Error("Unsupported currency");
@@ -74,7 +74,7 @@ if (protectedHeader.typ === "pay+JWT" || protectedHeader.typ === "kya+pay+JWT") 
 
 - Verify signature with Skyfire JWKS.
 - Enforce `iss`, `aud`, `alg`, `exp`, `iat`, `sub`, and `jti`.
-- Enforce expected token type (`kya+JWT`, `pay+JWT`, `kya+pay+JWT`).
+- Enforce expected token type (`kya+jwt`, `pay+jwt`, `kya-pay+jwt`).
 - Validate `env` (`production` vs `sandbox`) against your deployment environment.
 - For pay-capable tokens, validate `amount`, `cur`, and service pricing claims (`sps`, `spr`).
 - Validate service targeting claims before fulfilling requests.

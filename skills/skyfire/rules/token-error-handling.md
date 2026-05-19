@@ -37,7 +37,7 @@ if (!hasSufficientBalance) {
 - Return `403` for missing token.
 - Return `401` for invalid/expired token.
 - Return `402` for insufficient balance.
-- Include token type in message (`kya`, `pay`, `kya+pay`) to guide remediation.
+- Include token type in message (`kya`, `pay`, `kya-pay`) to guide remediation.
 - Prefer structured JSON errors for MCP/LLM clients.
 
 ## Reference

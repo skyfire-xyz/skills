@@ -1,7 +1,7 @@
 ---
 title: Choose the Right Token Type
 impact: HIGH
-description: Prevents incorrect token usage by mapping use cases to kya, pay, and kya+pay token types.
+description: Prevents incorrect token usage by mapping use cases to kya, pay, and kya-pay token types.
 tags: [tokens, kya, pay, kyapay, design]
 ---
 
@@ -27,7 +27,7 @@ const body = {
 const kyaTokenRequest = {
   type: "kya",
   sellerServiceId: "svc_restricted_content",
-  identityPermissions: ["nameFirst", "nameLast", "phoneNumber"]
+  identityPermissions: ["given_name", "family_name", "phone_number"]
 };
 
 // Payment only (PAY): use for payment-only calls
@@ -37,12 +37,12 @@ const payTokenRequest = {
   sellerServiceId: "svc_data_feed"
 };
 
-// Identity + payment (KYA+PAY): use for paid + identity-gated calls
+// Identity + payment (KYA-PAY): use for paid + identity-gated calls
 const kyaPayTokenRequest = {
-  type: "kya+pay",
+  type: "kya-pay",
   tokenAmount: "5.00",
   sellerServiceId: "svc_premium_api",
-  identityPermissions: ["selectedCountryCode", "birthdate"]
+  identityPermissions: ["phone_country_code", "birthdate"]
 };
 ```
 
@@ -50,7 +50,7 @@ const kyaPayTokenRequest = {
 
 - Use `kya` when seller requires identity claims only.
 - Use `pay` when seller requires only payment and no identity fields.
-- Use `kya+pay` when seller requires both identity and payment claims.
+- Use `kya-pay` when seller requires both identity and payment claims.
 - Check seller service `acceptedTokens` and identity requirements before choosing token type.
 
 ## Reference

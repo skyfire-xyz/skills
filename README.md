@@ -1,6 +1,6 @@
 # @skyfirexyz/skills
 
-Distributable agent skills for Skyfire developers building agent identity and payment flows with KYA, PAY, and KYA+PAY tokens.
+Distributable agent skills for Skyfire developers building agent identity and payment flows with KYA, PAY, and KYA-PAY tokens.
 
 ## Quick Start
 

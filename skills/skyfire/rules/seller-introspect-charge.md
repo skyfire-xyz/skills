@@ -86,7 +86,7 @@ return res.json({
 
 - Read token from `skyfire-pay-id`.
 - Introspect token before charging.
-- Only charge `pay` / `kya+pay`; reject identity-only `kya` for paid operations.
+- Only charge `pay` / `kya-pay`; reject identity-only `kya` for paid operations.
 - `chargeAmount` is a string and must be `> 0` and within token value/remaining balance.
 - For `PAY_PER_USE` seller services, `chargeAmount` can be omitted and Skyfire charges service `price`.
 - Return `403` missing, `401` invalid, `402` insufficient payment.

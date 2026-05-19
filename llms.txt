@@ -6,9 +6,9 @@ Skyfire enables programmatic interaction between buyers and sellers through a to
 
 ## Basic Workflow
 
-1. **Buyer agent creates a token** - Generates kya, pay, or kya+pay tokens for specific seller services
-2. **Seller service charges tokens** - Optionally charges pay and kya+pay tokens to process payments
-3. **Seller service extracts identity data** - Optionally extracts buyer identity data from kya and kya+pay tokens to verify buyer identity, create accounts, facilitate guest checkout, etc.
+1. **Buyer agent creates a token** - Generates kya, pay, or kya-pay tokens for specific seller services
+2. **Seller service charges tokens** - Optionally charges pay and kya-pay tokens to process payments
+3. **Seller service extracts identity data** - Optionally extracts buyer identity data from kya and kya-pay tokens to verify buyer identity, create accounts, facilitate guest checkout, etc.
 
 ### Authentication
 
@@ -29,12 +29,14 @@ Skyfire enables programmatic interaction between buyers and sellers through a to
 - [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens): Verify token integrity and extract identity/payment data.
 - [Handling Missing or Invalid tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens): Error handling guidance for missing/invalid token inputs.
 
+## API Overview
+- [Identity Fields](https://docs.skyfire.xyz/reference/identity-fields): Defines the set of verified identity fields used across Skyfire APIs.
+
 ## Seller Agent APIs
 
 - [Get Agent's Services - All](https://docs.skyfire.xyz/reference/get-agents-seller-services-all): Get all services available to an agent.
 - [Get Agent's Service](https://docs.skyfire.xyz/reference/get-agents-service): Get one seller service for an agent.
 - [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service-2): Create a new seller service.
-- [buyerIdentityRequirement](https://docs.skyfire.xyz/reference/buyeridentityrequirement): Field-level configuration for required buyer identity claims.
 - [Update Agent's Service](https://docs.skyfire.xyz/reference/update-agents-service): Update an existing seller service.
 - [Activate Agent's Service](https://docs.skyfire.xyz/reference/activate-agents-service): Mark a seller service active.
 - [Deactivate Agent's Service](https://docs.skyfire.xyz/reference/deactivate-agents-service): Mark a seller service inactive.
@@ -44,8 +46,6 @@ Skyfire enables programmatic interaction between buyers and sellers through a to
 - [Get Agent's Wallet Balance](https://docs.skyfire.xyz/reference/get-agents-wallet-balance): Retrieve wallet balance for an agent.
 - [Get Agent's Source IP Addresses](https://docs.skyfire.xyz/reference/get-agents-source-ip-addresses): List allowed source IP addresses.
 - [Set Agent's Source IP Addresses](https://docs.skyfire.xyz/reference/set-agents-source-ip-addresses): Set allowed source IP addresses.
-- [Get Agent's Token Version](https://docs.skyfire.xyz/reference/get-agents-token-version): Get currently configured token version.
-- [Set Agent's Token Version](https://docs.skyfire.xyz/reference/set-agents-token-version): Set token version for an agent.
 
 ## Service Directory APIs
 
@@ -57,10 +57,9 @@ Skyfire enables programmatic interaction between buyers and sellers through a to
 
 ## Token APIs
 
-- [Create Token](https://docs.skyfire.xyz/reference/create-token): Create a KYA, PAY, or KYA+PAY token.
+- [Create Token](https://docs.skyfire.xyz/reference/create-token): Create a KYA, PAY, or KYA-PAY token.
 - [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount): Token amount input field details.
 - [expiresAt](https://docs.skyfire.xyz/reference/expiresat): Token expiration field details.
-- [identityPermissions](https://docs.skyfire.xyz/reference/identitypermissions): Identity permissions field details.
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token): Charge an existing payment-capable token.
 - [chargeAmount](https://docs.skyfire.xyz/reference/chargeamount): Charge amount input field details.
 - [Charge Processing](https://docs.skyfire.xyz/reference/charge-processing): Charge execution workflow details.

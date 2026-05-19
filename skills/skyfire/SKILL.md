@@ -1,6 +1,6 @@
 ---
 name: skyfire
-description: Build buyer and seller agent workflows with Skyfire KYA, PAY, and KYA+PAY tokens. Use when implementing token creation, token introspection and charging, seller service lifecycle, service discovery, Skyfire MCP integration, or enterprise admin operations.
+description: Build buyer and seller agent workflows with Skyfire KYA, PAY, and KYA-PAY tokens. Use when implementing token creation, token introspection and charging, seller service lifecycle, service discovery, Skyfire MCP integration, or enterprise admin operations.
 tags: [skyfire, kya, pay, kyapay, mcp, agent-payments, identity]
 ---
 
@@ -8,7 +8,7 @@ tags: [skyfire, kya, pay, kyapay, mcp, agent-payments, identity]
 
 Use this skill when:
 - Building agent workflows that require identity and/or payment tokens
-- Creating buyer tokens (`kya`, `pay`, `kya+pay`) via REST or Skyfire MCP
+- Creating buyer tokens (`kya`, `pay`, `kya-pay`) via REST or Skyfire MCP
 - Accepting tokens on seller APIs and charging payment-capable tokens
 - Defining or updating seller service metadata and token requirements
 - Discovering services and tags from Skyfire service directory APIs
@@ -21,7 +21,7 @@ Use this skill when:
 3. Pick token type by operation:
    - `kya`: identity-only
    - `pay`: payment-only
-   - `kya+pay`: identity + payment
+   - `kya-pay`: identity + payment
 4. Pass buyer token to seller service in `skyfire-pay-id` (recommended by Skyfire docs).
 5. For seller charging and balance checks, use token introspection and charge endpoints.
 
