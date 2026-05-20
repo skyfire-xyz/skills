@@ -32,12 +32,12 @@ api_key = os.environ["SKYFIRE_BUYER_API_KEY"]
 expires_at = int(time.time()) + (20 * 60)  # epoch seconds
 
 payload = {
-    "type": "kya+pay",
+    "type": "kya-pay",
     "buyerTag": "agent-123",
     "tokenAmount": "3.50",
     "sellerServiceId": "svc_financial_data",
     "expiresAt": expires_at,
-    "identityPermissions": ["nameFirst", "nameLast"]
+    "identityPermissions": ["given_name", "family_name"]
 }
 
 response = requests.post(
@@ -56,10 +56,10 @@ token = response.json()["token"]
 ## Key Points
 
 - Use `POST /api/v1/tokens`.
-- For `pay` and `kya+pay`, include `tokenAmount`.
+- For `pay` and `kya-pay`, include `tokenAmount`.
 - Provide one target selector: `sellerServiceId` or `sellerDomainOrUrl`.
 - `expiresAt` is Unix epoch seconds and must be between 10 seconds and 24 hours in the future.
-- `identityPermissions` can be provided for `kya` and `kya+pay` tokens (default is empty array).
+- `identityPermissions` can be provided for `kya` and `kya-pay` tokens (default is empty array).
 - Persist only what you need; treat token material as sensitive.
 
 ## Reference

@@ -1,17 +1,17 @@
 ---
 name: skyfire
-description: Build buyer and seller agent workflows with Skyfire KYA, PAY, and KYA+PAY tokens. Use when implementing token creation, token introspection and charging, seller service lifecycle, service discovery, Skyfire MCP integration, or enterprise admin operations.
+description: Build buyer and seller agent workflows with Skyfire KYA, PAY, and KYA-PAY tokens. Use when implementing token creation, token introspection and charging, seller service lifecycle, service discovery, Skyfire MCP integration, or enterprise admin operations.
 tags: [skyfire, kya, pay, kyapay, mcp, agent-payments, identity]
 ---
 
 # skyfire
 
-Build buyer and seller agent workflows with Skyfire KYA, PAY, and KYA+PAY tokens. Use when implementing token creation, token introspection and charging, seller service lifecycle, service discovery, Skyfire MCP integration, or enterprise admin operations.
+Build buyer and seller agent workflows with Skyfire KYA, PAY, and KYA-PAY tokens. Use when implementing token creation, token introspection and charging, seller service lifecycle, service discovery, Skyfire MCP integration, or enterprise admin operations.
 
 ## When to use
 Use this skill when:
 - Building agent workflows that require identity and/or payment tokens
-- Creating buyer tokens (`kya`, `pay`, `kya+pay`) via REST or Skyfire MCP
+- Creating buyer tokens (`kya`, `pay`, `kya-pay`) via REST or Skyfire MCP
 - Accepting tokens on seller APIs and charging payment-capable tokens
 - Defining or updating seller service metadata and token requirements
 - Discovering services and tags from Skyfire service directory APIs
@@ -130,7 +130,7 @@ const resp = await fetch(`${baseUrl}/api/v1/tokens`, {
 
 **Impact:** HIGH
 
-> Prevents incorrect token usage by mapping use cases to kya, pay, and kya+pay token types.
+> Prevents incorrect token usage by mapping use cases to kya, pay, and kya-pay token types.
 
 # Choose the Right Token Type
 
@@ -154,7 +154,7 @@ const body = {
 const kyaTokenRequest = {
   type: "kya",
   sellerServiceId: "svc_restricted_content",
-  identityPermissions: ["nameFirst", "nameLast", "phoneNumber"]
+  identityPermissions: ["given_name", "family_name", "phone_number"]
 };
 
 // Payment only (PAY): use for payment-only calls
@@ -164,12 +164,12 @@ const payTokenRequest = {
   sellerServiceId: "svc_data_feed"
 };
 
-// Identity + payment (KYA+PAY): use for paid + identity-gated calls
+// Identity + payment (KYA-PAY): use for paid + identity-gated calls
 const kyaPayTokenRequest = {
-  type: "kya+pay",
+  type: "kya-pay",
   tokenAmount: "5.00",
   sellerServiceId: "svc_premium_api",
-  identityPermissions: ["selectedCountryCode", "birthdate"]
+  identityPermissions: ["phone_country_code", "birthdate"]
 };
 ```
 
@@ -177,7 +177,7 @@ const kyaPayTokenRequest = {
 
 - Use `kya` when seller requires identity claims only.
 - Use `pay` when seller requires only payment and no identity fields.
-- Use `kya+pay` when seller requires both identity and payment claims.
+- Use `kya-pay` when seller requires both identity and payment claims.
 - Check seller service `acceptedTokens` and identity requirements before choosing token type.
 
 ## Reference
@@ -222,12 +222,12 @@ api_key = os.environ["SKYFIRE_BUYER_API_KEY"]
 expires_at = int(time.time()) + (20 * 60)  # epoch seconds
 
 payload = {
-    "type": "kya+pay",
+    "type": "kya-pay",
     "buyerTag": "agent-123",
     "tokenAmount": "3.50",
     "sellerServiceId": "svc_financial_data",
     "expiresAt": expires_at,
-    "identityPermissions": ["nameFirst", "nameLast"]
+    "identityPermissions": ["given_name", "family_name"]
 }
 
 response = requests.post(
@@ -246,10 +246,10 @@ token = response.json()["token"]
 ## Key Points
 
 - Use `POST /api/v1/tokens`.
-- For `pay` and `kya+pay`, include `tokenAmount`.
+- For `pay` and `kya-pay`, include `tokenAmount`.
 - Provide one target selector: `sellerServiceId` or `sellerDomainOrUrl`.
 - `expiresAt` is Unix epoch seconds and must be between 10 seconds and 24 hours in the future.
-- `identityPermissions` can be provided for `kya` and `kya+pay` tokens (default is empty array).
+- `identityPermissions` can be provided for `kya` and `kya-pay` tokens (default is empty array).
 - Persist only what you need; treat token material as sensitive.
 
 ## Reference
@@ -296,8 +296,8 @@ Token creation must respect type-specific field requirements and strict TTL boun
 
 ## Key Points
 
-- `type` must be one of `kya`, `pay`, `kya+pay`.
-- `tokenAmount` is required for `pay` and `kya+pay`.
+- `type` must be one of `kya`, `pay`, `kya-pay`.
+- `tokenAmount` is required for `pay` and `kya-pay`.
 - One target is required: `sellerServiceId` or `sellerDomainOrUrl`.
 - `expiresAt` is epoch seconds and must be between 10 seconds and 24 hours in the future.
 - `tokenAmount` must be greater than zero and satisfy seller minimum token amount constraints.
@@ -403,7 +403,7 @@ return res.json({
 
 - Read token from `skyfire-pay-id`.
 - Introspect token before charging.
-- Only charge `pay` / `kya+pay`; reject identity-only `kya` for paid operations.
+- Only charge `pay` / `kya-pay`; reject identity-only `kya` for paid operations.
 - `chargeAmount` is a string and must be `> 0` and within token value/remaining balance.
 - For `PAY_PER_USE` seller services, `chargeAmount` can be omitted and Skyfire charges service `price`.
 - Return `403` missing, `401` invalid, `402` insufficient payment.
@@ -457,7 +457,7 @@ const { payload, protectedHeader } = await jwtVerify(token, JWKS, {
 });
 
 // Header/type checks
-if (!["kya+JWT", "pay+JWT", "kya+pay+JWT"].includes(String(protectedHeader.typ))) {
+if (!["kya+jwt", "pay+jwt", "kya-pay+jwt"].includes(String(protectedHeader.typ))) {
   throw new Error("Unsupported token type");
 }
 
@@ -485,7 +485,7 @@ if (payload.aud !== "<YOUR_SELLER_AGENT_ID>") {
 }
 
 // Pay/KYAPay-specific validations
-if (protectedHeader.typ === "pay+JWT" || protectedHeader.typ === "kya+pay+JWT") {
+if (protectedHeader.typ === "pay+jwt" || protectedHeader.typ === "kya-pay+jwt") {
   const amount = Number(payload.amount);
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
   if (payload.cur !== "USD") throw new Error("Unsupported currency");
@@ -500,7 +500,7 @@ if (protectedHeader.typ === "pay+JWT" || protectedHeader.typ === "kya+pay+JWT") 
 
 - Verify signature with Skyfire JWKS.
 - Enforce `iss`, `aud`, `alg`, `exp`, `iat`, `sub`, and `jti`.
-- Enforce expected token type (`kya+JWT`, `pay+JWT`, `kya+pay+JWT`).
+- Enforce expected token type (`kya+jwt`, `pay+jwt`, `kya-pay+jwt`).
 - Validate `env` (`production` vs `sandbox`) against your deployment environment.
 - For pay-capable tokens, validate `amount`, `cur`, and service pricing claims (`sps`, `spr`).
 - Validate service targeting claims before fulfilling requests.
@@ -557,7 +557,7 @@ if (!hasSufficientBalance) {
 - Return `403` for missing token.
 - Return `401` for invalid/expired token.
 - Return `402` for insufficient balance.
-- Include token type in message (`kya`, `pay`, `kya+pay`) to guide remediation.
+- Include token type in message (`kya`, `pay`, `kya-pay`) to guide remediation.
 - Prefer structured JSON errors for MCP/LLM clients.
 
 ## Reference
@@ -577,7 +577,7 @@ if (!hasSufficientBalance) {
 
 **Impact:** HIGH
 
-> Prevents misconfigured services by covering list/get/create/update/activate/deactivate APIs and buyerIdentityRequirement fields.
+> Prevents misconfigured services by covering list/get/create/update/activate/deactivate APIs and humanIdentityRequirement fields.
 
 # Manage Seller Service Lifecycle
 
@@ -621,8 +621,8 @@ await fetch("https://api.skyfire.xyz/api/v1/agents/seller-services", {
     minimumTokenAmount: "0.02",
     openApiSpecUrl: "https://api.weatherservice.com/v1/openapi.json",
     // Empty arrays are valid if no additional identity fields are required
-    buyerIdentityRequirement: { individual: ["birthdate"], business: [] },
-    acceptedTokens: ["pay", "kya+pay"]
+    humanIdentityRequirement: { individual: ["birthdate"], organization: [] },
+    acceptedTokens: ["pay", "kya-pay"]
   })
 });
 
@@ -641,7 +641,7 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
   headers,
   body: JSON.stringify({
     description: "Updated weather service with alerts",
-    acceptedTokens: ["kya", "pay", "kya+pay"]
+    acceptedTokens: ["kya", "pay", "kya-pay"]
   })
 });
 
@@ -659,10 +659,10 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
 - Use `POST /api/v1/agents/seller-services` to create.
 - Use `PATCH /api/v1/agents/seller-services/{sellerServiceId}` to update.
 - Use `POST .../{sellerServiceId}/activate` and `POST .../{sellerServiceId}/deactivate` for lifecycle state.
-- Create requires `name`, `description`, `tags`, `type`, `price`, `priceModel`, `minimumTokenAmount`, and `buyerIdentityRequirement`.
+- Create requires `name`, `description`, `tags`, `type`, `price`, `priceModel`, `minimumTokenAmount`, and `humanIdentityRequirement`.
 - `type` controls URL fields: `openApiSpecUrl` (`API`), `mcpServerUrl` (MCP types), `websiteUrl` (`WEB_PAGE`), `fetchAgentProfileUrl` (`FETCH_AGENT`).
 - Configure `acceptedTokens` and `maxTokenTTLSeconds` intentionally.
-- `buyerIdentityRequirement` supports `individual` and `business` field arrays; both can be empty arrays when only verified email/no extra identity fields are needed.
+- `humanIdentityRequirement` supports `individual` and `organization` field arrays; both can be empty arrays when only verified email/no extra identity fields are needed.
 - Activation can fail for unapproved services (`BAD_REQUEST`); plan around review/approval workflows.
 
 ## Reference
@@ -670,10 +670,10 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
 - [Get Agent's Services - All](https://docs.skyfire.xyz/reference/get-agents-seller-services-all)
 - [Get Agent's Service](https://docs.skyfire.xyz/reference/get-agents-service)
 - [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service-2)
-- [buyerIdentityRequirement](https://docs.skyfire.xyz/reference/buyeridentityrequirement)
 - [Update Agent's Service](https://docs.skyfire.xyz/reference/update-agents-service)
 - [Activate Agent's Service](https://docs.skyfire.xyz/reference/activate-agents-service)
 - [Deactivate Agent's Service](https://docs.skyfire.xyz/reference/deactivate-agents-service)
+- [Identity Fields](https://docs.skyfire.xyz/reference/identity-fields)
 
 ---
 
@@ -993,7 +993,7 @@ Treat all token operations as security-sensitive and payment-sensitive.
 ```typescript
 // Long-lived token + overbroad identity permission request
 const payload = {
-  type: "kya+pay",
+  type: "kya-pay",
   tokenAmount: "20.00",
   identityPermissions: ["*"],
   expiresAt: 9999999999
@@ -1007,11 +1007,11 @@ const now = Math.floor(Date.now() / 1000);
 const expiresAt = now + 10 * 60; // 10 minutes
 
 const payload = {
-  type: "kya+pay",
+  type: "kya-pay",
   buyerTag: "order-123",
   sellerServiceId: "350d433d-6ed4-4482-bcfc-14b7da807f9b",
   tokenAmount: "2.00",
-  identityPermissions: ["nameFirst", "nameLast"], // least privilege
+  identityPermissions: ["given_name", "family_name"], // least privilege
   expiresAt
 };
 ```
@@ -1029,7 +1029,7 @@ def require_token_from_header(request):
 - Verify JWT signature with Skyfire JWKS and enforce expected `iss`, `aud`, `alg`, `typ`, `exp`, and `iat`.
 - Cache JWKS for up to 60 minutes as recommended.
 - Use short expiration windows (10s to 24h for token creation).
-- Request only minimum identity fields required by business logic.
+- Request only minimum identity fields required by organization logic.
 - Validate token on every protected request and ensure service targeting claims match your service.
 - Do not log raw tokens in plaintext logs.
 - Fail closed on verification/charge API errors.

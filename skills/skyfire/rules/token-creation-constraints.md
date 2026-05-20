@@ -32,8 +32,8 @@ Token creation must respect type-specific field requirements and strict TTL boun
 
 ## Key Points
 
-- `type` must be one of `kya`, `pay`, `kya+pay`.
-- `tokenAmount` is required for `pay` and `kya+pay`.
+- `type` must be one of `kya`, `pay`, `kya-pay`.
+- `tokenAmount` is required for `pay` and `kya-pay`.
 - One target is required: `sellerServiceId` or `sellerDomainOrUrl`.
 - `expiresAt` is epoch seconds and must be between 10 seconds and 24 hours in the future.
 - `tokenAmount` must be greater than zero and satisfy seller minimum token amount constraints.

@@ -14,7 +14,7 @@ Treat all token operations as security-sensitive and payment-sensitive.
 ```typescript
 // Long-lived token + overbroad identity permission request
 const payload = {
-  type: "kya+pay",
+  type: "kya-pay",
   tokenAmount: "20.00",
   identityPermissions: ["*"],
   expiresAt: 9999999999
@@ -28,11 +28,11 @@ const now = Math.floor(Date.now() / 1000);
 const expiresAt = now + 10 * 60; // 10 minutes
 
 const payload = {
-  type: "kya+pay",
+  type: "kya-pay",
   buyerTag: "order-123",
   sellerServiceId: "350d433d-6ed4-4482-bcfc-14b7da807f9b",
   tokenAmount: "2.00",
-  identityPermissions: ["nameFirst", "nameLast"], // least privilege
+  identityPermissions: ["given_name", "family_name"], // least privilege
   expiresAt
 };
 ```
@@ -50,7 +50,7 @@ def require_token_from_header(request):
 - Verify JWT signature with Skyfire JWKS and enforce expected `iss`, `aud`, `alg`, `typ`, `exp`, and `iat`.
 - Cache JWKS for up to 60 minutes as recommended.
 - Use short expiration windows (10s to 24h for token creation).
-- Request only minimum identity fields required by business logic.
+- Request only minimum identity fields required by organization logic.
 - Validate token on every protected request and ensure service targeting claims match your service.
 - Do not log raw tokens in plaintext logs.
 - Fail closed on verification/charge API errors.

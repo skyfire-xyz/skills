@@ -1,7 +1,7 @@
 ---
 title: Manage Seller Service Lifecycle
 impact: HIGH
-description: Prevents misconfigured services by covering list/get/create/update/activate/deactivate APIs and buyerIdentityRequirement fields.
+description: Prevents misconfigured services by covering list/get/create/update/activate/deactivate APIs and humanIdentityRequirement fields.
 tags: [seller, services, lifecycle, directory]
 ---
 
@@ -47,8 +47,8 @@ await fetch("https://api.skyfire.xyz/api/v1/agents/seller-services", {
     minimumTokenAmount: "0.02",
     openApiSpecUrl: "https://api.weatherservice.com/v1/openapi.json",
     // Empty arrays are valid if no additional identity fields are required
-    buyerIdentityRequirement: { individual: ["birthdate"], business: [] },
-    acceptedTokens: ["pay", "kya+pay"]
+    humanIdentityRequirement: { individual: ["birthdate"], organization: [] },
+    acceptedTokens: ["pay", "kya-pay"]
   })
 });
 
@@ -67,7 +67,7 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
   headers,
   body: JSON.stringify({
     description: "Updated weather service with alerts",
-    acceptedTokens: ["kya", "pay", "kya+pay"]
+    acceptedTokens: ["kya", "pay", "kya-pay"]
   })
 });
 
@@ -85,10 +85,10 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
 - Use `POST /api/v1/agents/seller-services` to create.
 - Use `PATCH /api/v1/agents/seller-services/{sellerServiceId}` to update.
 - Use `POST .../{sellerServiceId}/activate` and `POST .../{sellerServiceId}/deactivate` for lifecycle state.
-- Create requires `name`, `description`, `tags`, `type`, `price`, `priceModel`, `minimumTokenAmount`, and `buyerIdentityRequirement`.
+- Create requires `name`, `description`, `tags`, `type`, `price`, `priceModel`, `minimumTokenAmount`, and `humanIdentityRequirement`.
 - `type` controls URL fields: `openApiSpecUrl` (`API`), `mcpServerUrl` (MCP types), `websiteUrl` (`WEB_PAGE`), `fetchAgentProfileUrl` (`FETCH_AGENT`).
 - Configure `acceptedTokens` and `maxTokenTTLSeconds` intentionally.
-- `buyerIdentityRequirement` supports `individual` and `business` field arrays; both can be empty arrays when only verified email/no extra identity fields are needed.
+- `humanIdentityRequirement` supports `individual` and `organization` field arrays; both can be empty arrays when only verified email/no extra identity fields are needed.
 - Activation can fail for unapproved services (`BAD_REQUEST`); plan around review/approval workflows.
 
 ## Reference
@@ -96,7 +96,7 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
 - [Get Agent's Services - All](https://docs.skyfire.xyz/reference/get-agents-seller-services-all)
 - [Get Agent's Service](https://docs.skyfire.xyz/reference/get-agents-service)
 - [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service-2)
-- [buyerIdentityRequirement](https://docs.skyfire.xyz/reference/buyeridentityrequirement)
 - [Update Agent's Service](https://docs.skyfire.xyz/reference/update-agents-service)
 - [Activate Agent's Service](https://docs.skyfire.xyz/reference/activate-agents-service)
 - [Deactivate Agent's Service](https://docs.skyfire.xyz/reference/deactivate-agents-service)
+- [Identity Fields](https://docs.skyfire.xyz/reference/identity-fields)
