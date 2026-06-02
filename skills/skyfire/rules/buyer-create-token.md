@@ -65,6 +65,3 @@ token = response.json()["token"]
 ## Reference
 
 - [Create Token API](https://docs.skyfire.xyz/reference/create-token)
-- [expiresAt](https://docs.skyfire.xyz/reference/expiresat)
-- [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount)
-- [identityPermissions](https://docs.skyfire.xyz/reference/identitypermissions)
