@@ -255,9 +255,6 @@ token = response.json()["token"]
 ## Reference
 
 - [Create Token API](https://docs.skyfire.xyz/reference/create-token)
-- [expiresAt](https://docs.skyfire.xyz/reference/expiresat)
-- [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount)
-- [identityPermissions](https://docs.skyfire.xyz/reference/identitypermissions)
 
 ---
 
@@ -305,8 +302,6 @@ Token creation must respect type-specific field requirements and strict TTL boun
 ## Reference
 
 - [Create Token](https://docs.skyfire.xyz/reference/create-token)
-- [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount)
-- [expiresAt](https://docs.skyfire.xyz/reference/expiresat)
 
 ---
 
@@ -415,8 +410,6 @@ return res.json({
 
 - [Introspect Token](https://docs.skyfire.xyz/reference/introspect-token)
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token)
-- [chargeAmount](https://docs.skyfire.xyz/reference/chargeamount)
-- [Charge Processing](https://docs.skyfire.xyz/reference/charge-processing)
 - [Settlement of Payments](https://docs.skyfire.xyz/reference/settlement-of-payments)
 - [Get Token Charges](https://docs.skyfire.xyz/reference/get-token-charges)
 - [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens)

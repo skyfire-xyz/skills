@@ -41,5 +41,3 @@ Token creation must respect type-specific field requirements and strict TTL boun
 ## Reference
 
 - [Create Token](https://docs.skyfire.xyz/reference/create-token)
-- [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount)
-- [expiresAt](https://docs.skyfire.xyz/reference/expiresat)

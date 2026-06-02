@@ -58,11 +58,7 @@ Skyfire enables programmatic interaction between buyers and sellers through a to
 ## Token APIs
 
 - [Create Token](https://docs.skyfire.xyz/reference/create-token): Create a KYA, PAY, or KYA-PAY token.
-- [tokenAmount](https://docs.skyfire.xyz/reference/tokenamount): Token amount input field details.
-- [expiresAt](https://docs.skyfire.xyz/reference/expiresat): Token expiration field details.
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token): Charge an existing payment-capable token.
-- [chargeAmount](https://docs.skyfire.xyz/reference/chargeamount): Charge amount input field details.
-- [Charge Processing](https://docs.skyfire.xyz/reference/charge-processing): Charge execution workflow details.
 - [Settlement of Payments](https://docs.skyfire.xyz/reference/settlement-of-payments): Settlement behavior and lifecycle.
 - [Get Token Charges](https://docs.skyfire.xyz/reference/get-token-charges): List charges performed against a token.
 - [Introspect Token](https://docs.skyfire.xyz/reference/introspect-token): Inspect token metadata and state.
