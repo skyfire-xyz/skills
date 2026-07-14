@@ -65,5 +65,5 @@ print(result.final_output)
 
 
 - [Skyfire MCP](https://mcp.skyfire.xyz/mcp)
-- [Using the Skyfire MCP Server](https://docs.skyfire.xyz/reference/using-the-skyfire-mcp-server)
-- [MCP Servers Guidance](https://docs.skyfire.xyz/reference/mcp-servers)
+- [Using the Skyfire MCP Server](https://docs.skyfire.xyz/docs/using-the-skyfire-mcp-server)
+- [MCP Servers Guidance](https://docs.skyfire.xyz/docs/mcp-servers)

@@ -71,7 +71,8 @@ npx skills remove <skill-name> --agent cursor
 
 ## References
 
-- [Skyfire Developer Portal](https://skyfire.xyz/llms.txt)
+- [Skyfire Website](https://skyfire.xyz) — see the auto-updated [llms.txt](https://skyfire.xyz/llms.txt)
+- [Skyfire Developer Portal](https://app.skyfire.xyz)
 - [Skyfire Developer Docs](https://docs.skyfire.xyz/docs)
 - [Skyfire API Reference Root](https://docs.skyfire.xyz/reference)
 - [Skyfire Solutions Demo](https://github.com/skyfire-xyz/skyfire-solutions-demo)

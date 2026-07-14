@@ -59,4 +59,4 @@ const resp = await fetch(`${baseUrl}/api/v1/tokens`, {
 ## Reference
 
 - [API Authentication](https://docs.skyfire.xyz/reference/api-authentication)
-- [Welcome / Environments](https://docs.skyfire.xyz/reference/welcome)
+- [Environments](https://docs.skyfire.xyz/reference/environments)

@@ -45,7 +45,7 @@ Use this skill when:
 
 ### 5. Discovery and Agent Operations
 - [Discover Services and Tags](rules/service-directory-discovery.md)
-- [Use Wallet, Source IP, and Token Version APIs](rules/agent-ops-wallet-ip-version.md)
+- [Use Wallet and Source IP APIs](rules/agent-ops-wallet-ip.md)
 
 ### 6. MCP Integration Patterns
 - [Integrate Skyfire MCP in Agent Workflows](rules/mcp-integration.md)
@@ -58,12 +58,12 @@ Use this skill when:
 
 ## References
 
-- [Skyfire Developer Portal](https://skyfire.xyz/llms.txt)
+- [Skyfire llms.txt](https://skyfire.xyz/llms.txt)
 - [Developer Docs Overview](https://docs.skyfire.xyz/docs)
-- [Welcome / Environments](https://docs.skyfire.xyz/reference/welcome)
+- [Environments](https://docs.skyfire.xyz/reference/environments)
 - [API Authentication](https://docs.skyfire.xyz/reference/api-authentication)
 - [Create Token](https://docs.skyfire.xyz/reference/create-token)
 - [Introspect Token](https://docs.skyfire.xyz/reference/introspect-token)
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token)
-- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens)
-- [Integrating Tokens into Seller Services](https://docs.skyfire.xyz/reference/integrating-tokens-into-your-seller-services)
+- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/docs/verify-and-extract-data-from-tokens)
+- [Integrating Tokens into Seller Services](https://docs.skyfire.xyz/docs/integrating-tokens-into-your-services)

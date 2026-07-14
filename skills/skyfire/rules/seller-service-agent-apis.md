@@ -95,7 +95,7 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
 
 - [Get Agent's Services - All](https://docs.skyfire.xyz/reference/get-agents-seller-services-all)
 - [Get Agent's Service](https://docs.skyfire.xyz/reference/get-agents-service)
-- [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service-2)
+- [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service)
 - [Update Agent's Service](https://docs.skyfire.xyz/reference/update-agents-service)
 - [Activate Agent's Service](https://docs.skyfire.xyz/reference/activate-agents-service)
 - [Deactivate Agent's Service](https://docs.skyfire.xyz/reference/deactivate-agents-service)

@@ -37,7 +37,7 @@ Use this skill when:
 
 5. [Discovery and Agent Operations](#discovery-and-agent-operations)
    5.1. [Discover Services and Tags](#discover-services-and-tags)
-   5.2. [Use Wallet, Source IP, and Token Version APIs](#use-wallet-source-ip-and-token-version-apis)
+   5.2. [Use Wallet and Source IP APIs](#use-wallet-and-source-ip-apis)
 
 6. [MCP Integration Patterns](#mcp-integration-patterns)
    6.1. [Integrate Skyfire MCP in Agent Workflows](#integrate-skyfire-mcp-in-agent-workflows)
@@ -116,7 +116,7 @@ const resp = await fetch(`${baseUrl}/api/v1/tokens`, {
 ## Reference
 
 - [API Authentication](https://docs.skyfire.xyz/reference/api-authentication)
-- [Welcome / Environments](https://docs.skyfire.xyz/reference/welcome)
+- [Environments](https://docs.skyfire.xyz/reference/environments)
 
 ---
 
@@ -182,7 +182,7 @@ const kyaPayTokenRequest = {
 
 ## Reference
 
-- [Token Types Overview](https://docs.skyfire.xyz/docs/explore-products)
+- [Token Types Overview](https://docs.skyfire.xyz/docs/introduction-to-skyfire)
 - [Create Token](https://docs.skyfire.xyz/reference/create-token)
 
 ---
@@ -412,7 +412,7 @@ return res.json({
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token)
 - [Settlement of Payments](https://docs.skyfire.xyz/reference/settlement-of-payments)
 - [Get Token Charges](https://docs.skyfire.xyz/reference/get-token-charges)
-- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens)
+- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/docs/handling-missing-or-invalid-tokens)
 
 ---
 
@@ -479,7 +479,7 @@ if (payload.aud !== "<YOUR_SELLER_AGENT_ID>") {
 
 // Pay/KYAPay-specific validations
 if (protectedHeader.typ === "pay+jwt" || protectedHeader.typ === "kya-pay+jwt") {
-  const amount = Number(payload.amount);
+  const amount = Number(payload.amt); // token amount in currency units
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
   if (payload.cur !== "USD") throw new Error("Unsupported currency");
 
@@ -495,16 +495,18 @@ if (protectedHeader.typ === "pay+jwt" || protectedHeader.typ === "kya-pay+jwt") 
 - Enforce `iss`, `aud`, `alg`, `exp`, `iat`, `sub`, and `jti`.
 - Enforce expected token type (`kya+jwt`, `pay+jwt`, `kya-pay+jwt`).
 - Validate `env` (`production` vs `sandbox`) against your deployment environment.
-- For pay-capable tokens, validate `amount`, `cur`, and service pricing claims (`sps`, `spr`).
+- For pay-capable tokens, validate `amt` (amount in currency units), `cur`, and service pricing claims (`sps`, `spr`).
+- Payment claims use short names: `amt`/`val` (amount), `cur` (currency), `sps` (pricing scheme), `spr` (service price), `stp`/`sti` (settlement).
+- For sandbox tokens, expect `env` = `sandbox` and issuer/JWKS at `https://app-sandbox.skyfire.xyz`.
 - Validate service targeting claims before fulfilling requests.
 - Cache JWKS for up to 60 minutes.
 - As a seller you can also use the introspect API 
 
 ## Reference
 
-- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens)
+- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/docs/verify-and-extract-data-from-tokens)
 - [JWKS Endpoint](https://app.skyfire.xyz/.well-known/jwks.json)
-- [Welcome / Environments](https://docs.skyfire.xyz/reference/welcome)
+- [Environments](https://docs.skyfire.xyz/reference/environments)
 - [Skyfire Kyapay TypeScript Example](https://github.com/skyfire-xyz/kyapay/blob/main/code-examples/verifyKyaPayToken/typescript/src/index.ts)
 - [Skyfire Token Introspection](https://docs.skyfire.xyz/reference/introspect-token)
 
@@ -555,7 +557,7 @@ if (!hasSufficientBalance) {
 
 ## Reference
 
-- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens)
+- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/docs/handling-missing-or-invalid-tokens)
 - [HTTP Error Status Codes](https://docs.skyfire.xyz/reference/http-error-status-codes)
 
 ---
@@ -662,7 +664,7 @@ await fetch(`https://api.skyfire.xyz/api/v1/agents/seller-services/${service.id}
 
 - [Get Agent's Services - All](https://docs.skyfire.xyz/reference/get-agents-seller-services-all)
 - [Get Agent's Service](https://docs.skyfire.xyz/reference/get-agents-service)
-- [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service-2)
+- [Create Agent's Service](https://docs.skyfire.xyz/reference/create-agents-service)
 - [Update Agent's Service](https://docs.skyfire.xyz/reference/update-agents-service)
 - [Activate Agent's Service](https://docs.skyfire.xyz/reference/activate-agents-service)
 - [Deactivate Agent's Service](https://docs.skyfire.xyz/reference/deactivate-agents-service)
@@ -742,15 +744,15 @@ const sellerServiceId = service.id;
 
 ---
 
-### 5.2. Use Wallet, Source IP, and Token Version APIs
+### 5.2. Use Wallet and Source IP APIs
 
-<a name="use-wallet-source-ip-and-token-version-apis"></a>
+<a name="use-wallet-and-source-ip-apis"></a>
 
 **Impact:** MEDIUM
 
-> Covers operational endpoints for wallet checks, source IP controls, and token version management.
+> Covers operational endpoints for wallet balance checks and source IP controls.
 
-# Use Wallet, Source IP, and Token Version APIs
+# Use Wallet and Source IP APIs
 
 Operational APIs help keep agent behavior predictable and auditable.
 
@@ -777,18 +779,14 @@ curl -X PUT "https://api.skyfire.xyz/api/v1/agents/source-ips" \
 
 ## Key Points
 
-- Use wallet balance endpoint before creating high-value payment tokens.
-- Set source IP list when you need stricter network-origin controls.
-- Manage token version explicitly if your stack requires deterministic token claim versions.
-- Treat `404 Token Version Not Set` as "latest supported version" behavior.
+- Use `GET /api/v1/agents/balance` to check available funds before creating high-value payment tokens.
+- Set the source IP list when you need stricter network-origin controls on agent requests.
 
 ## Reference
 
 - [Get Agent's Wallet Balance](https://docs.skyfire.xyz/reference/get-agents-wallet-balance)
 - [Get Agent's Source IP Addresses](https://docs.skyfire.xyz/reference/get-agents-source-ip-addresses)
 - [Set Agent's Source IP Addresses](https://docs.skyfire.xyz/reference/set-agents-source-ip-addresses)
-- [Get Agent's Token Version](https://docs.skyfire.xyz/reference/get-agents-token-version)
-- [Set Agent's Token Version](https://docs.skyfire.xyz/reference/set-agents-token-version)
 
 ---
 
@@ -864,8 +862,8 @@ print(result.final_output)
 
 
 - [Skyfire MCP](https://mcp.skyfire.xyz/mcp)
-- [Using the Skyfire MCP Server](https://docs.skyfire.xyz/reference/using-the-skyfire-mcp-server)
-- [MCP Servers Guidance](https://docs.skyfire.xyz/reference/mcp-servers)
+- [Using the Skyfire MCP Server](https://docs.skyfire.xyz/docs/using-the-skyfire-mcp-server)
+- [MCP Servers Guidance](https://docs.skyfire.xyz/docs/mcp-servers)
 
 ---
 
@@ -1030,21 +1028,21 @@ def require_token_from_header(request):
 ## Reference
 
 - [HTTP Error Status Codes](https://docs.skyfire.xyz/reference/http-error-status-codes)
-- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens)
+- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/docs/verify-and-extract-data-from-tokens)
 - [JWKS Endpoint](https://app.skyfire.xyz/.well-known/jwks.json)
 
 ---
 
 ## References
 
-- [Skyfire Developer Portal](https://skyfire.xyz/llms.txt)
+- [Skyfire llms.txt](https://skyfire.xyz/llms.txt)
 - [Developer Docs Overview](https://docs.skyfire.xyz/docs)
-- [Welcome / Environments](https://docs.skyfire.xyz/reference/welcome)
+- [Environments](https://docs.skyfire.xyz/reference/environments)
 - [API Authentication](https://docs.skyfire.xyz/reference/api-authentication)
 - [Create Token](https://docs.skyfire.xyz/reference/create-token)
 - [Introspect Token](https://docs.skyfire.xyz/reference/introspect-token)
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token)
-- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens)
-- [Integrating Tokens into Seller Services](https://docs.skyfire.xyz/reference/integrating-tokens-into-your-seller-services)
+- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/docs/verify-and-extract-data-from-tokens)
+- [Integrating Tokens into Seller Services](https://docs.skyfire.xyz/docs/integrating-tokens-into-your-services)
 
 _This file is auto-generated. Run `npm run build:agents` after modifying skill rules._
