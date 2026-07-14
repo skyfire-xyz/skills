@@ -58,5 +58,5 @@ def require_token_from_header(request):
 ## Reference
 
 - [HTTP Error Status Codes](https://docs.skyfire.xyz/reference/http-error-status-codes)
-- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens)
+- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/docs/verify-and-extract-data-from-tokens)
 - [JWKS Endpoint](https://app.skyfire.xyz/.well-known/jwks.json)

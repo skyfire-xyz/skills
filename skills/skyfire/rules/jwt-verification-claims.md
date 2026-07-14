@@ -60,7 +60,7 @@ if (payload.aud !== "<YOUR_SELLER_AGENT_ID>") {
 
 // Pay/KYAPay-specific validations
 if (protectedHeader.typ === "pay+jwt" || protectedHeader.typ === "kya-pay+jwt") {
-  const amount = Number(payload.amount);
+  const amount = Number(payload.amt); // token amount in currency units
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
   if (payload.cur !== "USD") throw new Error("Unsupported currency");
 
@@ -76,15 +76,17 @@ if (protectedHeader.typ === "pay+jwt" || protectedHeader.typ === "kya-pay+jwt") 
 - Enforce `iss`, `aud`, `alg`, `exp`, `iat`, `sub`, and `jti`.
 - Enforce expected token type (`kya+jwt`, `pay+jwt`, `kya-pay+jwt`).
 - Validate `env` (`production` vs `sandbox`) against your deployment environment.
-- For pay-capable tokens, validate `amount`, `cur`, and service pricing claims (`sps`, `spr`).
+- For pay-capable tokens, validate `amt` (amount in currency units), `cur`, and service pricing claims (`sps`, `spr`).
+- Payment claims use short names: `amt`/`val` (amount), `cur` (currency), `sps` (pricing scheme), `spr` (service price), `stp`/`sti` (settlement).
+- For sandbox tokens, expect `env` = `sandbox` and issuer/JWKS at `https://app-sandbox.skyfire.xyz`.
 - Validate service targeting claims before fulfilling requests.
 - Cache JWKS for up to 60 minutes.
 - As a seller you can also use the introspect API 
 
 ## Reference
 
-- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/reference/verify-and-extract-data-from-tokens)
+- [Verify and Extract Data from Tokens](https://docs.skyfire.xyz/docs/verify-and-extract-data-from-tokens)
 - [JWKS Endpoint](https://app.skyfire.xyz/.well-known/jwks.json)
-- [Welcome / Environments](https://docs.skyfire.xyz/reference/welcome)
+- [Environments](https://docs.skyfire.xyz/reference/environments)
 - [Skyfire Kyapay TypeScript Example](https://github.com/skyfire-xyz/kyapay/blob/main/code-examples/verifyKyaPayToken/typescript/src/index.ts)
 - [Skyfire Token Introspection](https://docs.skyfire.xyz/reference/introspect-token)

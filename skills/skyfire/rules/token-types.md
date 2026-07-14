@@ -55,5 +55,5 @@ const kyaPayTokenRequest = {
 
 ## Reference
 
-- [Token Types Overview](https://docs.skyfire.xyz/docs/explore-products)
+- [Token Types Overview](https://docs.skyfire.xyz/docs/introduction-to-skyfire)
 - [Create Token](https://docs.skyfire.xyz/reference/create-token)

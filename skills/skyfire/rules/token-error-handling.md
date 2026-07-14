@@ -42,5 +42,5 @@ if (!hasSufficientBalance) {
 
 ## Reference
 
-- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens)
+- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/docs/handling-missing-or-invalid-tokens)
 - [HTTP Error Status Codes](https://docs.skyfire.xyz/reference/http-error-status-codes)

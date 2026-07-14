@@ -100,4 +100,4 @@ return res.json({
 - [Charge Token](https://docs.skyfire.xyz/reference/charge-token)
 - [Settlement of Payments](https://docs.skyfire.xyz/reference/settlement-of-payments)
 - [Get Token Charges](https://docs.skyfire.xyz/reference/get-token-charges)
-- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/reference/handling-missing-or-invalid-tokens)
+- [Handling Missing or Invalid Tokens](https://docs.skyfire.xyz/docs/handling-missing-or-invalid-tokens)
